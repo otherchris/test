@@ -1,0 +1,21 @@
+#! /bin/sh
+
+password_cmd="\"ALTER USER postgres WITH PASSWORD 'postgres'\""
+service postgresql start
+su postgres -c "psql -U postgres -c ${password_cmd}"
+
+echo $PORTAL_TEST_EMAIL
+
+export PORTAL_API_TEST_EMAIL=$PORTAL_TEST_USER_EMAIL
+export PORTAL_API_TEST_PASSWORD=$PORTAL_TEST_USER_PASSWORD
+export V2_URL="https://portal-dev.eltoro.com"
+export TARGET_URL="https://portal-services-dev.eltoro.com"
+
+echo $GEOALERT_API_TEST_EMAIL
+
+export MIX_ENV=test
+
+mix ecto.create
+make migrate
+mix test --exclude skip_ci:true --exclude e2e:true
+
